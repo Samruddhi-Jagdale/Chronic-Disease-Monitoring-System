@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emergency Guide — ChroniCare AI</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .emergency-card { border:2px solid var(--accent);border-radius:var(--radius);padding:1.4rem;margin-bottom:1rem;background:#fff5f5; }
+    .emergency-card h4 { color:var(--accent); }
+    .threshold-table td, .threshold-table th { padding:.6rem .9rem; }
+    .safe    { color:var(--secondary);font-weight:700; }
+    .warning { color:#e37400;font-weight:700; }
+    .danger  { color:var(--accent);font-weight:700; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="/"><div class="brand-icon">❤️</div>ChroniCare AI</a>
+  <ul class="navbar-nav" id="navMenu">
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/health-monitor">Monitor</a></li>
+    <li><a href="/emergency" class="active">Emergency</a></li>
+    <li><a href="#" onclick="logout()">Logout</a></li>
+  </ul>
+  <button class="navbar-toggle">☰</button>
+</nav>
+
+<div class="page-wrapper">
+  <div class="container" style="max-width:820px;">
+    <div style="margin-bottom:1.5rem;">
+      <h1 class="section-title" style="color:var(--accent);">🚨 Emergency Guide</h1>
+      <p class="section-subtitle">Know when to seek immediate medical attention. This guide is for reference — always call emergency services when in doubt.</p>
+    </div>
+
+    <div class="emergency-banner" style="margin-bottom:1.5rem;">
+      <h3>⚠️ When in doubt — CALL EMERGENCY SERVICES</h3>
+      <p style="margin:0;opacity:.92;">India: <strong>112</strong> or <strong>108</strong> | Emergency helpline numbers may vary by region. Always keep your doctor's number saved.</p>
+    </div>
+
+    <!-- Emergency thresholds -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-header"><h3>⚠️ Critical Health Thresholds</h3></div>
+      <div class="card-body table-wrap">
+        <table class="threshold-table">
+          <thead>
+            <tr><th>Parameter</th><th class="safe">Safe Range</th><th class="warning">Warning</th><th class="danger">Emergency</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Blood Sugar (mg/dL)</td><td class="safe">70 – 140</td><td class="warning">140 – 250</td><td class="danger">&lt;70 or &gt;250</td></tr>
+            <tr><td>Systolic BP (mmHg)</td><td class="safe">&lt;120</td><td class="warning">120 – 180</td><td class="danger">&gt;180</td></tr>
+            <tr><td>Diastolic BP (mmHg)</td><td class="safe">&lt;80</td><td class="warning">80 – 120</td><td class="danger">&gt;120</td></tr>
+            <tr><td>Heart Rate (bpm)</td><td class="safe">60 – 100</td><td class="warning">100 – 120</td><td class="danger">&lt;40 or &gt;120</td></tr>
+            <tr><td>Oxygen Level (%)</td><td class="safe">95 – 100</td><td class="warning">90 – 95</td><td class="danger">&lt;90</td></tr>
+            <tr><td>Temperature (°C)</td><td class="safe">36.0 – 37.5</td><td class="warning">37.5 – 39.0</td><td class="danger">&gt;39.0</td></tr>
+            <tr><td>Cholesterol (mg/dL)</td><td class="safe">&lt;200</td><td class="warning">200 – 240</td><td class="danger">&gt;240</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Emergency conditions -->
+    <h2 style="margin-bottom:1rem;">Emergency Warning Signs by Condition</h2>
+
+    <div class="emergency-card">
+      <h4>🩸 Diabetes Emergency</h4>
+      <p><strong>Hypoglycemia (Low Sugar &lt;70):</strong> Shakiness, sweating, confusion, unconsciousness.<br>
+      <strong>Action:</strong> Consume 15g fast-acting carbs (glucose tablets, juice). Recheck in 15 min. Seek help if unconscious.</p>
+      <p><strong>Hyperglycemia (High Sugar &gt;250):</strong> Extreme thirst, frequent urination, blurred vision, fruity breath.<br>
+      <strong>Action:</strong> Check ketones if possible. Take prescribed medication. Seek emergency care if vomiting or confusion.</p>
+    </div>
+
+    <div class="emergency-card">
+      <h4>💉 Hypertensive Crisis (BP &gt;180/120)</h4>
+      <p>Severe headache, vision changes, chest pain, shortness of breath, nausea.<br>
+      <strong>Action:</strong> Sit down, remain calm, do NOT exercise. Call emergency services immediately. Do not take extra BP medication without doctor instructions.</p>
+    </div>
+
+    <div class="emergency-card">
+      <h4>❤️ Heart Attack Warning Signs</h4>
+      <p>Chest pain or pressure, pain spreading to arm/jaw/back, sweating, nausea, shortness of breath, irregular heartbeat (HR &gt;120 or &lt;40).<br>
+      <strong>Action:</strong> Call emergency services IMMEDIATELY. Chew aspirin 325mg if not allergic and no contraindication. Do not drive yourself.</p>
+    </div>
+
+    <div class="emergency-card">
+      <h4>🫁 Low Oxygen (&lt;90%)</h4>
+      <p>Bluish lips/fingertips (cyanosis), severe shortness of breath, rapid breathing, confusion.<br>
+      <strong>Action:</strong> Sit upright, use prescribed oxygen if available. Call emergency services immediately.</p>
+    </div>
+
+    <div class="emergency-card">
+      <h4>🌡 High Fever (&gt;39°C)</h4>
+      <p>Chills, confusion, rash, severe headache, stiff neck, difficulty breathing.<br>
+      <strong>Action:</strong> Take paracetamol if not contraindicated. Stay hydrated. Seek medical care for fever &gt;39°C lasting more than 24 hours.</p>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="card-body" style="text-align:center;">
+        <h3>Ready to Monitor Your Vitals?</h3>
+        <p style="color:var(--text-muted);">Log your readings now to check if any values need attention.</p>
+        <a href="/health-monitor" class="btn btn-primary btn-lg">📊 Check My Vitals Now</a>
+      </div>
+    </div>
+
+    <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin-top:1.5rem;">
+      This guide is for informational purposes only and does not replace professional medical advice. Always consult a qualified healthcare provider for personalized guidance.
+    </p>
+  </div>
+</div>
+
+<footer><p>© 2024 ChroniCare AI · Powered by IBM watsonx.ai</p></footer>
+<script src="/js/app.js"></script>
+</body>
+</html>

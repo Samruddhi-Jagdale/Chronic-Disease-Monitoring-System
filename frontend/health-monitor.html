@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Health Monitor — ChroniCare AI</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .range-hint   { font-size:.75rem;color:var(--text-muted);margin-top:.2rem; }
+    .result-section { margin-top:2rem; }
+    .concerns-list li { margin-bottom:.4rem; }
+    .analysis-section { background:var(--bg); border-radius:var(--radius); padding:1.2rem; margin-top:1rem; }
+    .analysis-block   { margin-bottom:1rem; }
+    .analysis-block h5 { color:var(--primary); margin-bottom:.3rem; font-size:.9rem; }
+    .emergency-alert  { display:none; }
+    .vitals-grid      { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1rem; margin:1.5rem 0; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="/"><div class="brand-icon">❤️</div>ChroniCare AI</a>
+  <ul class="navbar-nav" id="navMenu">
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/health-monitor" class="active">Monitor</a></li>
+    <li><a href="/health-history">History</a></li>
+    <li><a href="/chat">AI Chat</a></li>
+    <li><a href="#" onclick="logout()">Logout</a></li>
+  </ul>
+  <button class="navbar-toggle">☰</button>
+</nav>
+
+<div class="page-wrapper">
+  <div class="container" style="max-width:800px;">
+    <div style="margin-bottom:1.5rem;">
+      <h1 class="section-title">📊 Health Monitoring</h1>
+      <p class="section-subtitle">Enter your current readings and get an AI-powered health analysis.</p>
+    </div>
+
+    <!-- Emergency Alert (shown conditionally) -->
+    <div id="emergencyBox" class="emergency-alert emergency-banner" style="display:none;">
+      <h3>🚨 Emergency Alert</h3>
+      <p id="emergencyMsg">Critical values detected. Please seek medical attention immediately.</p>
+      <div id="emergencyList"></div>
+    </div>
+
+    <!-- Health form -->
+    <div class="card">
+      <div class="card-header"><h3>Enter Your Vitals</h3></div>
+      <div class="card-body">
+        <form id="healthForm" novalidate>
+
+          <h4 style="color:var(--primary);margin-bottom:1rem;">🩸 Blood Metrics</h4>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>Blood Sugar (mg/dL) *</label>
+              <input type="number" name="bloodSugar" placeholder="e.g. 120" min="20" max="600" required />
+              <div class="range-hint">Normal: 70–140</div>
+              <div class="field-error"></div>
+            </div>
+            <div class="form-group">
+              <label>Systolic BP (mmHg) *</label>
+              <input type="number" name="systolicBP" placeholder="e.g. 120" min="50" max="300" required />
+              <div class="range-hint">Normal: &lt;120</div>
+              <div class="field-error"></div>
+            </div>
+            <div class="form-group">
+              <label>Diastolic BP (mmHg) *</label>
+              <input type="number" name="diastolicBP" placeholder="e.g. 80" min="30" max="200" required />
+              <div class="range-hint">Normal: &lt;80</div>
+              <div class="field-error"></div>
+            </div>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>Heart Rate (bpm) *</label>
+              <input type="number" name="heartRate" placeholder="e.g. 72" min="20" max="300" required />
+              <div class="range-hint">Normal: 60–100</div>
+              <div class="field-error"></div>
+            </div>
+            <div class="form-group">
+              <label>Oxygen Level (%) *</label>
+              <input type="number" name="oxygenLevel" placeholder="e.g. 98" min="50" max="100" required />
+              <div class="range-hint">Normal: 95–100%</div>
+              <div class="field-error"></div>
+            </div>
+            <div class="form-group">
+              <label>Temperature (°C)</label>
+              <input type="number" name="temperature" placeholder="e.g. 37.0" min="30" max="45" step="0.1" value="37.0" />
+              <div class="range-hint">Normal: 36.0–37.5°C</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cholesterol (mg/dL)</label>
+              <input type="number" name="cholesterol" placeholder="e.g. 180" min="50" max="600" value="180" />
+              <div class="range-hint">Normal: &lt;200</div>
+            </div>
+            <div class="form-group">
+              <label>BMI</label>
+              <input type="number" name="bmi" placeholder="e.g. 23.5" min="10" max="60" step="0.1" id="bmiInput" />
+              <div class="range-hint">Normal: 18.5–24.9</div>
+            </div>
+          </div>
+
+          <h4 style="color:var(--primary);margin:1.2rem 0 1rem;">🏃 Lifestyle Metrics</h4>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>Exercise (min/day)</label>
+              <input type="number" name="exercise" placeholder="e.g. 30" min="0" max="480" value="30" />
+            </div>
+            <div class="form-group">
+              <label>Water Intake (litres)</label>
+              <input type="number" name="waterIntake" placeholder="e.g. 2.0" min="0" max="10" step="0.1" value="2.0" />
+            </div>
+            <div class="form-group">
+              <label>Sleep Hours</label>
+              <input type="number" name="sleepHours" placeholder="e.g. 7" min="0" max="24" step="0.5" value="7" />
+            </div>
+          </div>
+
+          <div id="formAlert"></div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block" id="analyzeBtn">
+            🤖 Analyze with IBM watsonx.ai
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Results section (hidden until analysis) -->
+    <div id="resultsSection" class="result-section" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <h3>🤖 AI Health Analysis</h3>
+          <span id="aiSourceBadge" class="badge badge-primary">watsonx.ai</span>
+        </div>
+        <div class="card-body">
+
+          <!-- Risk level -->
+          <div style="text-align:center;margin-bottom:1.5rem;">
+            <div class="risk-circle" id="riskCircle">—</div>
+            <div style="font-weight:700;font-size:1.1rem;" id="riskText">—</div>
+            <div style="color:var(--text-muted);font-size:.85rem;">Risk Level · Health Score: <strong id="hScore">—</strong>/100</div>
+          </div>
+
+          <!-- Vitals summary -->
+          <div class="vitals-grid" id="vitalsSummary"></div>
+
+          <!-- Analysis blocks -->
+          <div class="analysis-section">
+            <div class="analysis-block">
+              <h5>📋 Health Analysis</h5>
+              <p id="analysisText"></p>
+            </div>
+            <div class="analysis-block">
+              <h5>⚠️ Health Concerns</h5>
+              <p id="concernsText"></p>
+            </div>
+            <div class="analysis-block">
+              <h5>🥗 Diet Recommendations</h5>
+              <p id="dietText"></p>
+            </div>
+            <div class="analysis-block">
+              <h5>🏃 Exercise Plan</h5>
+              <p id="exerciseText"></p>
+            </div>
+            <div class="analysis-block">
+              <h5>💡 Lifestyle Tips</h5>
+              <p id="lifestyleText"></p>
+            </div>
+            <div class="analysis-block">
+              <h5>💊 Medication Note</h5>
+              <p id="medNoteText"></p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.2rem;">
+            <a href="/health-history" class="btn btn-secondary">📋 View History</a>
+            <a href="/chat" class="btn btn-primary">💬 Ask AI More</a>
+            <a href="/lifestyle" class="btn btn-secondary">🥗 Full Lifestyle Plan</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><p>© 2024 ChroniCare AI · Powered by IBM watsonx.ai</p></footer>
+
+<script src="/js/app.js"></script>
+<script>
+  requireAuth();
+
+  // Auto-fill BMI from patient profile
+  (async () => {
+    try {
+      const data = await API.get('/api/patient/me');
+      if (data.patient?.bmi) {
+        document.getElementById('bmiInput').value = data.patient.bmi;
+      }
+    } catch(e) {}
+  })();
+
+  document.getElementById('healthForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('analyzeBtn');
+    const alertBox = document.getElementById('formAlert');
+
+    const valid = validateForm(e.target, {
+      bloodSugar:  { required: true, min: 20,  max: 600 },
+      systolicBP:  { required: true, min: 50,  max: 300 },
+      diastolicBP: { required: true, min: 30,  max: 200 },
+      heartRate:   { required: true, min: 20,  max: 300 },
+      oxygenLevel: { required: true, min: 50,  max: 100 }
+    });
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Analyzing…';
+    alertBox.innerHTML = '';
+    showLoading('Sending data to IBM watsonx.ai for analysis…');
+
+    const formData = Object.fromEntries(new FormData(e.target).entries());
+
+    try {
+      const result = await API.post('/api/health/submit', formData);
+      hideLoading();
+      const r = result.report;
+
+      // Emergency alerts
+      if (r.emergencyAlerts.length > 0) {
+        document.getElementById('emergencyBox').style.display = 'block';
+        document.getElementById('emergencyList').innerHTML =
+          r.emergencyAlerts.map(a =>
+            `<div style="margin:.3rem 0;"><strong>${a.type} (${a.value}):</strong> ${a.message}</div>`
+          ).join('');
+        document.getElementById('emergencyBox').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        document.getElementById('emergencyBox').style.display = 'none';
+      }
+
+      // Risk level
+      const risk = r.riskLevel;
+      const circle = document.getElementById('riskCircle');
+      circle.textContent = risk;
+      circle.className = `risk-circle ${risk.toLowerCase()}`;
+      document.getElementById('riskText').textContent  = `${risk} Risk`;
+      document.getElementById('hScore').textContent    = r.healthScore;
+
+      // AI source badge
+      const badge = document.getElementById('aiSourceBadge');
+      badge.textContent = r.aiSource === 'watsonx' ? 'IBM watsonx.ai' : r.aiSource === 'mock' ? 'Demo Mode' : 'AI Fallback';
+
+      // Vitals summary
+      const hd = r.healthData;
+      const vitals = [
+        { label:'Blood Sugar', value:`${hd.bloodSugar} mg/dL`,   status: hd.bloodSugar>250||hd.bloodSugar<70?'danger':hd.bloodSugar>140?'warning':'normal' },
+        { label:'Blood Pressure', value:`${hd.systolicBP}/${hd.diastolicBP}`, status: hd.systolicBP>180?'danger':hd.systolicBP>140?'warning':'normal' },
+        { label:'Heart Rate', value:`${hd.heartRate} bpm`,        status: hd.heartRate>120?'danger':hd.heartRate>100?'warning':'normal' },
+        { label:'Oxygen', value:`${hd.oxygenLevel}%`,             status: hd.oxygenLevel<90?'danger':hd.oxygenLevel<95?'warning':'normal' },
+        { label:'Cholesterol', value:`${hd.cholesterol} mg/dL`,   status: hd.cholesterol>240?'danger':hd.cholesterol>200?'warning':'normal' },
+        { label:'BMI', value:hd.bmi,                              status: hd.bmi>30||hd.bmi<18.5?'warning':'normal' },
+        { label:'Temperature', value:`${hd.temperature}°C`,       status: hd.temperature>39?'danger':hd.temperature>37.5?'warning':'normal' },
+        { label:'Sleep', value:`${hd.sleepHours} hrs`,            status: 'normal' }
+      ];
+      document.getElementById('vitalsSummary').innerHTML = vitals.map(v =>
+        `<div class="health-value-card ${v.status}">
+          <div class="value">${v.value}</div>
+          <div class="label">${v.label}</div>
+        </div>`
+      ).join('');
+
+      // Analysis text
+      const a = r.analysis;
+      document.getElementById('analysisText').textContent  = a.analysis      || '—';
+      document.getElementById('concernsText').textContent  = a.concerns      || '—';
+      document.getElementById('dietText').textContent      = a.dietPlan      || '—';
+      document.getElementById('exerciseText').textContent  = a.exercisePlan  || '—';
+      document.getElementById('lifestyleText').textContent = a.lifestyleTips || '—';
+      document.getElementById('medNoteText').textContent   = a.medicationsNote || '—';
+
+      document.getElementById('resultsSection').style.display = 'block';
+      document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+
+      if (r.aiSource === 'mock') {
+        alertBox.innerHTML = '<div class="alert alert-warning">ℹ️ AI credentials not configured — showing demo analysis. Add your IBM watsonx.ai API key to get real AI responses.</div>';
+      }
+
+      showToast('Analysis complete!', 'success');
+    } catch(err) {
+      hideLoading();
+      alertBox.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
+      showToast('Analysis failed. Please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🤖 Analyze with IBM watsonx.ai';
+    }
+  });
+</script>
+</body>
+</html>

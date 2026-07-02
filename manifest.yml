@@ -1,0 +1,12 @@
+applications:
+  - name: chronic-disease-ai
+    memory: 256M
+    instances: 1
+    buildpack: nodejs_buildpack
+    command: npm start
+    env:
+      NODE_ENV: production
+      # Set these as IBM Cloud environment variables, not here
+      # WATSONX_API_KEY: your-key
+      # WATSONX_PROJECT_ID: your-project-id
+      # SESSION_SECRET: your-session-secret

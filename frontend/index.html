@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agent for Chronic Disease Monitoring</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .features-section { padding: 4rem 0; background: var(--surface); }
+    .how-section      { padding: 4rem 0; }
+    .cta-section      { padding: 4rem 2rem; background: linear-gradient(135deg,#e8f0fe,#f0f4ff); text-align:center; }
+    .step-number      { width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;flex-shrink:0; }
+    .step             { display:flex;gap:1.2rem;align-items:flex-start; }
+    .disease-pills    { display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-top:1.2rem; }
+    .pill             { background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:.3rem .9rem;border-radius:20px;font-size:.85rem; }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────── -->
+<nav class="navbar">
+  <a class="navbar-brand" href="/">
+    <div class="brand-icon">❤️</div>
+    ChroniCare AI
+  </a>
+  <ul class="navbar-nav" id="navMenu">
+    <li><a href="/">Home</a></li>
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/health-monitor">Monitor</a></li>
+    <li><a href="/chat">AI Chat</a></li>
+    <li><a href="/medications">Medications</a></li>
+    <li><a href="/login" id="authLink">Login</a></li>
+  </ul>
+  <button class="navbar-toggle" aria-label="Toggle navigation">☰</button>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <h1>AI-Powered Chronic Disease Monitoring</h1>
+    <p>Intelligent health monitoring for Diabetes, Hypertension, and Heart Disease — powered by IBM watsonx.ai. Get personalized insights, medication reminders, and emergency alerts.</p>
+    <div class="disease-pills">
+      <span class="pill">🩸 Diabetes</span>
+      <span class="pill">💊 Hypertension</span>
+      <span class="pill">❤️ Heart Disease</span>
+      <span class="pill">🫁 Asthma</span>
+      <span class="pill">🦴 Arthritis</span>
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem;">
+      <a href="/register" class="btn btn-primary btn-lg">🚀 Get Started Free</a>
+      <a href="/health-monitor" class="btn btn-secondary btn-lg">📊 Try Health Monitor</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ─────────────────────────────────────────────── -->
+<section class="features-section">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <h2>Everything You Need to Stay Healthy</h2>
+      <p style="color:var(--text-muted);">Comprehensive tools for chronic disease management — all in one place.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="padding:1.5rem;text-align:center;">
+        <div class="feature-icon">🤖</div>
+        <h4>AI Health Analysis</h4>
+        <p style="color:var(--text-muted);font-size:.88rem;">IBM watsonx.ai analyzes your vitals and provides personalized health insights, risk assessment, and recommendations.</p>
+      </div>
+      <div class="card" style="padding:1.5rem;text-align:center;">
+        <div class="feature-icon">🚨</div>
+        <h4>Emergency Alerts</h4>
+        <p style="color:var(--text-muted);font-size:.88rem;">Instant alerts when your blood sugar, blood pressure, or heart rate exceed safe limits. Know when to seek help immediately.</p>
+      </div>
+      <div class="card" style="padding:1.5rem;text-align:center;">
+        <div class="feature-icon">💊</div>
+        <h4>Medication Reminders</h4>
+        <p style="color:var(--text-muted);font-size:.88rem;">Never miss a dose. Add your medications, set reminders, and view today's complete medication schedule.</p>
+      </div>
+      <div class="card" style="padding:1.5rem;text-align:center;">
+        <div class="feature-icon">💬</div>
+        <h4>AI Chat Assistant</h4>
+        <p style="color:var(--text-muted);font-size:.88rem;">Ask health questions and get AI-powered answers from IBM watsonx.ai — diet advice, symptom explanations, and more.</p>
+      </div>
+      <div class="card" style="padding:1.5rem;text-align:center;">
+        <div class="feature-icon">📈</div>
+        <h4>Health History</h4>
+        <p style="color:var(--text-muted);font-size:.88rem;">Track your health journey over time. View past readings, AI recommendations, and monitor your progress.</p>
+      </div>
+      <div class="card" style="padding:1.5rem;text-align:center;">
+        <div class="feature-icon">🥗</div>
+        <h4>Lifestyle Plans</h4>
+        <p style="color:var(--text-muted);font-size:.88rem;">Personalized diet plans, exercise routines, and wellness tips tailored to your specific chronic condition.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ────────────────────────────────────────── -->
+<section class="how-section">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <h2>How It Works</h2>
+    </div>
+    <div class="grid-4">
+      <div style="text-align:center;">
+        <div class="step-number" style="margin:0 auto 1rem;">1</div>
+        <h4>Register</h4>
+        <p style="color:var(--text-muted);font-size:.85rem;">Create an account and set up your patient profile with health history.</p>
+      </div>
+      <div style="text-align:center;">
+        <div class="step-number" style="margin:0 auto 1rem;">2</div>
+        <h4>Log Vitals</h4>
+        <p style="color:var(--text-muted);font-size:.85rem;">Enter your daily health readings — blood sugar, BP, heart rate, and more.</p>
+      </div>
+      <div style="text-align:center;">
+        <div class="step-number" style="margin:0 auto 1rem;">3</div>
+        <h4>AI Analysis</h4>
+        <p style="color:var(--text-muted);font-size:.85rem;">IBM watsonx.ai analyzes your data and generates personalized recommendations.</p>
+      </div>
+      <div style="text-align:center;">
+        <div class="step-number" style="margin:0 auto 1rem;">4</div>
+        <h4>Stay Healthy</h4>
+        <p style="color:var(--text-muted);font-size:.85rem;">Follow the plan, get medication reminders, and track your improvement.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ──────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <h2 style="color:var(--primary-dark);">Start Monitoring Your Health Today</h2>
+  <p style="color:var(--text-muted);margin-bottom:1.5rem;">Join and take control of your chronic disease management with AI.</p>
+  <a href="/register" class="btn btn-primary btn-lg">Create Free Account →</a>
+</section>
+
+<!-- ── Footer ──────────────────────────────────────────────── -->
+<footer>
+  <p>© 2024 ChroniCare AI — AI Agent for Chronic Disease Monitoring</p>
+  <p style="margin-top:.3rem;opacity:.7;">Powered by IBM watsonx.ai · Built on Node.js + Express</p>
+  <p style="margin-top:.3rem;opacity:.5;font-size:.75rem;">This application is for informational purposes only. Always consult a qualified healthcare professional for medical advice.</p>
+</footer>
+
+<script src="/js/app.js"></script>
+<script>
+  // Update auth link based on session
+  (async () => {
+    try {
+      const data = await API.get('/api/auth/session');
+      const link = document.getElementById('authLink');
+      if (data.authenticated) {
+        link.textContent = 'Dashboard';
+        link.href = '/dashboard';
+      }
+    } catch(e) {}
+  })();
+</script>
+</body>
+</html>

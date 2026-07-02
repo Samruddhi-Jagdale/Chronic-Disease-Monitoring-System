@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Profile — ChroniCare AI</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a class="navbar-brand" href="/"><div class="brand-icon">❤️</div>ChroniCare AI</a>
+  <ul class="navbar-nav" id="navMenu">
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/health-monitor">Monitor</a></li>
+    <li><a href="/chat">AI Chat</a></li>
+    <li><a href="#" onclick="logout()">Logout</a></li>
+  </ul>
+  <button class="navbar-toggle">☰</button>
+</nav>
+
+<div class="page-wrapper">
+  <div class="container" style="max-width:680px;">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <h1 class="section-title">📋 Patient Profile</h1>
+      <p class="section-subtitle">Complete your health profile so AI can give you personalized recommendations.</p>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <div class="card">
+      <div class="card-header"><h3>Personal Information</h3></div>
+      <div class="card-body">
+        <form id="patientForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" name="name" id="patName" placeholder="Your full name" required />
+              <div class="field-error"></div>
+            </div>
+            <div class="form-group">
+              <label>Age *</label>
+              <input type="number" name="age" id="patAge" placeholder="e.g. 45" min="1" max="120" required />
+              <div class="field-error"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Gender *</label>
+              <select name="gender" required>
+                <option value="">— Select —</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="field-error"></div>
+            </div>
+            <div class="form-group">
+              <label>Disease Type *</label>
+              <select name="diseaseType" required>
+                <option value="">— Select —</option>
+                <option value="Diabetes Type 1">Diabetes Type 1</option>
+                <option value="Diabetes Type 2">Diabetes Type 2</option>
+                <option value="Hypertension">Hypertension</option>
+                <option value="Heart Disease">Heart Disease</option>
+                <option value="Asthma">Asthma</option>
+                <option value="COPD">COPD</option>
+                <option value="Obesity">Obesity</option>
+                <option value="Arthritis">Arthritis</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="field-error"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Height (cm)</label>
+              <input type="number" name="height" placeholder="e.g. 165" min="50" max="250" />
+              <div class="field-error"></div>
+            </div>
+            <div class="form-group">
+              <label>Weight (kg)</label>
+              <input type="number" name="weight" placeholder="e.g. 70" min="10" max="300" />
+              <div class="field-error"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" name="phone" placeholder="+91 98765 43210" />
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" name="email" placeholder="your@email.com" />
+            </div>
+          </div>
+
+          <!-- Calculated BMI preview -->
+          <div id="bmiPreview" class="alert alert-info" style="display:none;">
+            📊 Calculated BMI: <strong id="bmiValue">—</strong>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block" id="saveBtn">
+            💾 Save Profile & Continue
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><p>© 2024 ChroniCare AI · Powered by IBM watsonx.ai</p></footer>
+
+<script src="/js/app.js"></script>
+<script>
+  requireAuth();
+
+  // BMI preview
+  function updateBMI() {
+    const h = parseFloat(document.querySelector('[name="height"]').value);
+    const w = parseFloat(document.querySelector('[name="weight"]').value);
+    if (h > 0 && w > 0) {
+      const bmi = (w / ((h/100)**2)).toFixed(1);
+      document.getElementById('bmiValue').textContent = bmi;
+      document.getElementById('bmiPreview').style.display = 'flex';
+    }
+  }
+  document.querySelector('[name="height"]').addEventListener('input', updateBMI);
+  document.querySelector('[name="weight"]').addEventListener('input', updateBMI);
+
+  // Pre-fill if existing profile
+  (async () => {
+    try {
+      const data = await API.get('/api/patient/me');
+      if (data.patient) {
+        const p = data.patient;
+        const form = document.getElementById('patientForm');
+        ['name','age','gender','diseaseType','height','weight','phone','email'].forEach(f => {
+          const el = form.querySelector(`[name="${f}"]`);
+          if (el && p[f]) el.value = p[f];
+        });
+        updateBMI();
+      }
+    } catch(e) {}
+  })();
+
+  document.getElementById('patientForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alertBox = document.getElementById('alertBox');
+    const btn      = document.getElementById('saveBtn');
+
+    const valid = validateForm(e.target, {
+      name:        { required: true, minLength: 2 },
+      age:         { required: true, min: 1, max: 120 },
+      gender:      { required: true },
+      diseaseType: { required: true }
+    });
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    alertBox.innerHTML = '';
+
+    const formData = Object.fromEntries(new FormData(e.target).entries());
+
+    try {
+      await API.post('/api/patient', formData);
+      showToast('Profile saved successfully!', 'success');
+      setTimeout(() => window.location.href = '/dashboard', 1000);
+    } catch(err) {
+      alertBox.innerHTML = `<div class="alert alert-danger">⚠️ ${err.message}</div>`;
+      btn.disabled = false;
+      btn.textContent = '💾 Save Profile & Continue';
+    }
+  });
+</script>
+</body>
+</html>

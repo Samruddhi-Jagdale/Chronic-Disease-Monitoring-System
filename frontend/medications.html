@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medications — ChroniCare AI</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .med-card        { display:flex;align-items:center;gap:1rem;padding:1rem;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.75rem;background:var(--card);transition:var(--transition); }
+    .med-card:hover  { box-shadow:var(--shadow); }
+    .med-icon        { width:48px;height:48px;background:var(--primary-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0; }
+    .med-times       { display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.3rem; }
+    .time-chip       { background:var(--primary-light);color:var(--primary);padding:.15rem .55rem;border-radius:12px;font-size:.76rem;font-weight:700; }
+    .modal-overlay   { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal           { background:var(--card);border-radius:var(--radius);padding:2rem;max-width:520px;width:90%;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto; }
+    .times-container { display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem; }
+    .time-tag        { display:flex;align-items:center;gap:.3rem;background:var(--primary-light);color:var(--primary);padding:.2rem .65rem;border-radius:20px;font-size:.82rem; }
+    .time-tag button { background:none;border:none;cursor:pointer;color:var(--accent);font-size:.9rem;line-height:1; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="/"><div class="brand-icon">❤️</div>ChroniCare AI</a>
+  <ul class="navbar-nav" id="navMenu">
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/health-monitor">Monitor</a></li>
+    <li><a href="/medications" class="active">Medications</a></li>
+    <li><a href="#" onclick="logout()">Logout</a></li>
+  </ul>
+  <button class="navbar-toggle">☰</button>
+</nav>
+
+<div class="page-wrapper">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div>
+        <h1 class="section-title">💊 Medication Reminders</h1>
+        <p class="section-subtitle">Manage your daily medications and track today's schedule.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">➕ Add Medication</button>
+    </div>
+
+    <!-- Today's schedule highlight -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-header"><h4>📅 Today's Schedule — <span id="todayDate"></span></h4></div>
+      <div class="card-body" id="todaySchedule">
+        <div class="no-data" style="text-align:center;padding:1.5rem;color:var(--text-muted);">Loading…</div>
+      </div>
+    </div>
+
+    <!-- All medications -->
+    <div class="card">
+      <div class="card-header"><h4>📋 All Medications</h4></div>
+      <div class="card-body" id="allMeds">
+        <div class="no-data" style="text-align:center;padding:1.5rem;color:var(--text-muted);">Loading…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="medModal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+      <h3 id="modalTitle">Add Medication</h3>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-muted);">✕</button>
+    </div>
+
+    <div id="modalAlert"></div>
+
+    <form id="medForm" novalidate>
+      <input type="hidden" id="editId" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Medicine Name *</label>
+          <input type="text" name="name" id="medName" placeholder="e.g. Metformin" required />
+          <div class="field-error"></div>
+        </div>
+        <div class="form-group">
+          <label>Dosage *</label>
+          <input type="text" name="dosage" id="medDosage" placeholder="e.g. 500mg" required />
+          <div class="field-error"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Reminder Times *</label>
+        <div class="times-container" id="timesContainer"></div>
+        <div style="display:flex;gap:.5rem;">
+          <input type="time" id="timeInput" style="flex:1;" />
+          <button type="button" class="btn btn-secondary" onclick="addTime()">+ Add Time</button>
+        </div>
+        <div class="field-error" id="timesError"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Frequency *</label>
+          <select name="frequency" id="medFreq" required>
+            <option value="">— Select —</option>
+            <option value="Once daily">Once daily</option>
+            <option value="Twice daily">Twice daily</option>
+            <option value="Three times daily">Three times daily</option>
+            <option value="Every 6 hours">Every 6 hours</option>
+            <option value="As needed">As needed</option>
+            <option value="Weekly">Weekly</option>
+          </select>
+          <div class="field-error"></div>
+        </div>
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" name="startDate" id="medStartDate" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>End Date (optional)</label>
+        <input type="date" name="endDate" id="medEndDate" />
+      </div>
+
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea name="notes" id="medNotes" rows="2" placeholder="e.g. Take with food"></textarea>
+      </div>
+
+      <div style="display:flex;gap:.75rem;">
+        <button type="submit" class="btn btn-primary" style="flex:1;" id="saveMedBtn">Save Medication</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer><p>© 2024 ChroniCare AI · Powered by IBM watsonx.ai</p></footer>
+
+<script src="/js/app.js"></script>
+<script>
+  requireAuth();
+
+  let times = [];
+
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  async function loadMedications() {
+    try {
+      const data = await API.get('/api/medications');
+      renderAllMeds(data.medications);
+
+      const today = await API.get('/api/medications/today');
+      renderTodaySchedule(today.medications);
+    } catch(err) {
+      document.getElementById('allMeds').innerHTML = `<div class="alert alert-danger">⚠️ ${err.message}</div>`;
+    }
+  }
+
+  function renderTodaySchedule(meds) {
+    const el = document.getElementById('todaySchedule');
+    if (!meds.length) {
+      el.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-muted);">No medications scheduled for today. <a href="#" onclick="openModal()">Add one →</a></div>`;
+      return;
+    }
+    el.innerHTML = meds.flatMap(m =>
+      (m.times || []).map(t => `
+        <div class="med-card">
+          <div class="med-icon">💊</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;">${m.name}</div>
+            <div style="font-size:.83rem;color:var(--text-muted);">${m.dosage} · ${m.frequency}</div>
+            ${m.notes ? `<div style="font-size:.78rem;color:var(--text-muted);font-style:italic;">${m.notes}</div>` : ''}
+          </div>
+          <span class="time-chip" style="font-size:.88rem;padding:.35rem .85rem;">${t}</span>
+        </div>`)
+    ).join('') || `<div style="text-align:center;padding:1rem;color:var(--text-muted);">No medications with time set for today.</div>`;
+  }
+
+  function renderAllMeds(meds) {
+    const el = document.getElementById('allMeds');
+    if (!meds.length) {
+      el.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-muted);">
+        <div style="font-size:2.5rem;margin-bottom:.75rem;">💊</div>
+        <p>No medications added yet.</p>
+        <button class="btn btn-primary" onclick="openModal()">Add Your First Medication</button>
+      </div>`;
+      return;
+    }
+    el.innerHTML = meds.map(m => `
+      <div class="med-card">
+        <div class="med-icon">💊</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:.95rem;">${m.name}</div>
+          <div style="font-size:.83rem;color:var(--text-muted);">${m.dosage} · ${m.frequency}</div>
+          <div class="med-times">
+            ${(m.times||[]).map(t => `<span class="time-chip">${t}</span>`).join('')}
+          </div>
+          ${m.notes ? `<div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem;font-style:italic;">${m.notes}</div>` : ''}
+          ${m.endDate ? `<div style="font-size:.75rem;color:var(--text-muted);">Ends: ${m.endDate}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.4rem;">
+          <button class="btn btn-secondary btn-sm" onclick="editMed('${m.id}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteMed('${m.id}')">🗑 Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openModal(med = null) {
+    times = med?.times ? [...med.times] : [];
+    document.getElementById('editId').value       = med?.id       || '';
+    document.getElementById('medName').value      = med?.name     || '';
+    document.getElementById('medDosage').value    = med?.dosage   || '';
+    document.getElementById('medFreq').value      = med?.frequency|| '';
+    document.getElementById('medStartDate').value = med?.startDate|| '';
+    document.getElementById('medEndDate').value   = med?.endDate  || '';
+    document.getElementById('medNotes').value     = med?.notes    || '';
+    document.getElementById('modalTitle').textContent = med ? 'Edit Medication' : 'Add Medication';
+    document.getElementById('modalAlert').innerHTML = '';
+    renderTimeTags();
+    document.getElementById('medModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('medModal').classList.remove('open');
+  }
+
+  function addTime() {
+    const t = document.getElementById('timeInput').value;
+    if (!t) return;
+    if (!times.includes(t)) {
+      times.push(t);
+      renderTimeTags();
+    }
+    document.getElementById('timeInput').value = '';
+  }
+
+  function removeTime(t) {
+    times = times.filter(x => x !== t);
+    renderTimeTags();
+  }
+
+  function renderTimeTags() {
+    document.getElementById('timesContainer').innerHTML =
+      times.map(t => `<div class="time-tag">${t} <button type="button" onclick="removeTime('${t}')">✕</button></div>`).join('');
+  }
+
+  let allMedsCache = [];
+  (async () => {
+    await loadMedications();
+    // cache for edit
+    try {
+      const d = await API.get('/api/medications');
+      allMedsCache = d.medications;
+    } catch(e) {}
+  })();
+
+  function editMed(id) {
+    const med = allMedsCache.find(m => m.id === id);
+    if (med) openModal(med);
+  }
+
+  async function deleteMed(id) {
+    if (!confirm('Delete this medication?')) return;
+    try {
+      await API.delete(`/api/medications/${id}`);
+      showToast('Medication deleted.', 'success');
+      await loadMedications();
+      const d = await API.get('/api/medications');
+      allMedsCache = d.medications;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+
+  document.getElementById('medForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alertBox = document.getElementById('modalAlert');
+    const btn      = document.getElementById('saveMedBtn');
+
+    if (times.length === 0) {
+      document.getElementById('timesError').textContent = 'Add at least one reminder time.';
+      return;
+    }
+    document.getElementById('timesError').textContent = '';
+
+    const valid = validateForm(e.target, {
+      name:      { required: true },
+      dosage:    { required: true },
+      frequency: { required: true }
+    });
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    alertBox.innerHTML = '';
+
+    const editId = document.getElementById('editId').value;
+    const body   = {
+      name:      document.getElementById('medName').value.trim(),
+      dosage:    document.getElementById('medDosage').value.trim(),
+      frequency: document.getElementById('medFreq').value,
+      startDate: document.getElementById('medStartDate').value,
+      endDate:   document.getElementById('medEndDate').value || null,
+      notes:     document.getElementById('medNotes').value.trim(),
+      times
+    };
+
+    try {
+      if (editId) {
+        await API.put(`/api/medications/${editId}`, body);
+        showToast('Medication updated!', 'success');
+      } else {
+        await API.post('/api/medications', body);
+        showToast('Medication added!', 'success');
+      }
+      closeModal();
+      await loadMedications();
+      const d = await API.get('/api/medications');
+      allMedsCache = d.medications;
+    } catch(err) {
+      alertBox.innerHTML = `<div class="alert alert-danger">⚠️ ${err.message}</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Medication';
+    }
+  });
+</script>
+</body>
+</html>
