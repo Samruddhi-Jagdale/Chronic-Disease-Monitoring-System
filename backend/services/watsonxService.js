@@ -65,7 +65,10 @@ async function generateText(prompt) {
  * Build a health analysis prompt from the submitted health data.
  */
 function buildHealthAnalysisPrompt(healthData, patientInfo) {
-  return `You are an expert AI health assistant specialized in chronic disease monitoring.
+  return `<|system|>
+You are an expert AI health assistant specialized in chronic disease monitoring. Provide structured, medically accurate, and compassionate health analysis. Always format your response with the exact section labels provided.
+<|user|>
+Analyze the following patient health data and provide a complete structured report.
 
 Patient Information:
 - Name: ${patientInfo?.name || 'Patient'}
@@ -86,17 +89,17 @@ Current Health Readings:
 - Water Intake: ${healthData.waterIntake} liters
 - Sleep Hours: ${healthData.sleepHours} hours
 
-Please provide a structured health analysis with:
-1. RISK_LEVEL: (Low / Medium / High / Critical)
-2. HEALTH_CONCERNS: List the main health concerns based on the readings.
-3. ANALYSIS: A brief explanation of what the readings indicate.
-4. DIET_PLAN: Specific dietary recommendations.
-5. EXERCISE_PLAN: Exercise recommendations suited to the condition.
-6. LIFESTYLE_TIPS: Water intake, sleep, and stress management advice.
-7. MEDICATIONS_NOTE: General note about medication adherence (not prescriptions).
-8. EMERGENCY_ACTION: What to do if any emergency symptoms appear.
-
-Be concise, medically accurate, and compassionate. Format each section with its label.`;
+Provide the analysis using EXACTLY these section labels:
+RISK_LEVEL: (Low / Medium / High / Critical — choose one)
+HEALTH_CONCERNS: (List main concerns based on the readings)
+ANALYSIS: (Brief explanation of what the readings indicate)
+DIET_PLAN: (Specific dietary recommendations for this patient)
+EXERCISE_PLAN: (Exercise recommendations suited to the condition)
+LIFESTYLE_TIPS: (Water intake, sleep, and stress management advice)
+MEDICATIONS_NOTE: (General note about medication adherence — no prescriptions)
+EMERGENCY_ACTION: (What to do if emergency symptoms appear)
+<|assistant|>
+`;
 }
 
 /**
@@ -105,41 +108,45 @@ Be concise, medically accurate, and compassionate. Format each section with its 
 function buildChatPrompt(userMessage, conversationHistory, patientInfo) {
   const historyText = conversationHistory
     .slice(-6)
-    .map(m => `${m.role === 'user' ? 'Patient' : 'Assistant'}: ${m.content}`)
+    .map(m => `<|${m.role === 'user' ? 'user' : 'assistant'}|>\n${m.content}`)
     .join('\n');
 
-  return `You are a compassionate AI health assistant specialized in chronic disease management.
-Your role is to provide helpful, accurate health guidance.
-Always recommend consulting a qualified doctor for medical decisions.
+  const patientCtx = patientInfo
+    ? `The patient's name is ${patientInfo.name}, age ${patientInfo.age}, diagnosed with ${patientInfo.diseaseType}.`
+    : '';
 
-${patientInfo ? `Patient Context: ${patientInfo.name}, Age ${patientInfo.age}, Condition: ${patientInfo.diseaseType}` : ''}
-
-Conversation so far:
-${historyText}
-
-Patient: ${userMessage}
-Assistant:`;
+  return `<|system|>
+You are a compassionate and knowledgeable AI health assistant specializing in chronic disease management (diabetes, hypertension, heart disease). Provide helpful, accurate, practical health guidance. Always recommend consulting a qualified doctor for medical decisions. Be warm, clear, and supportive. ${patientCtx}
+${historyText ? historyText + '\n' : ''}<|user|>
+${userMessage}
+<|assistant|>
+`;
 }
 
 /**
  * Build a lifestyle recommendation prompt.
  */
 function buildLifestylePrompt(patientInfo, latestReport) {
-  return `As a health coach specializing in chronic disease management, provide a personalized weekly lifestyle plan for:
+  return `<|system|>
+You are an expert health coach specializing in chronic disease management. Create practical, detailed, and personalized lifestyle plans.
+<|user|>
+Create a comprehensive personalized weekly lifestyle plan for the following patient:
 
 Patient: ${patientInfo?.name || 'Patient'}, Age: ${patientInfo?.age || 'Unknown'}
 Condition: ${patientInfo?.diseaseType || 'Chronic disease'}
 ${latestReport ? `Latest Risk Level: ${latestReport.riskLevel}` : ''}
 
-Provide a detailed plan with:
-1. MEAL_PLAN: 3 meals + 2 snacks per day (7-day overview)
-2. EXERCISE_ROUTINE: Daily exercise schedule
-3. HYDRATION_GOAL: Specific daily water intake targets
-4. SLEEP_HYGIENE: Tips for improving sleep quality
-5. STRESS_MANAGEMENT: Practical stress reduction techniques
-6. MONITORING_SCHEDULE: When to check vitals
+Provide detailed sections using EXACTLY these labels:
+MEAL_PLAN: (3 balanced meals + 2 snacks per day, 7-day overview tailored to the condition)
+EXERCISE_ROUTINE: (Daily exercise schedule with specific activities and durations)
+HYDRATION_GOAL: (Specific daily water intake targets and timing)
+SLEEP_HYGIENE: (Practical tips for improving sleep quality)
+STRESS_MANAGEMENT: (Actionable stress reduction techniques)
+MONITORING_SCHEDULE: (When and how often to check vitals)
 
-Keep it practical, achievable, and specific to the condition.`;
+Keep it practical, achievable, and specific to the diagnosed condition.
+<|assistant|>
+`;
 }
 
 // ── Mock responses for unconfigured state ────────────────────

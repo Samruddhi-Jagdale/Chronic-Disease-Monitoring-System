@@ -14,16 +14,16 @@ const watsonxConfig = {
   apiKey:     process.env.WATSONX_API_KEY     || '',
   projectId:  process.env.WATSONX_PROJECT_ID  || '',
   endpoint:   process.env.WATSONX_ENDPOINT    || 'https://us-south.ml.cloud.ibm.com',
-  modelId:    process.env.WATSONX_MODEL_ID    || 'ibm/granite-13b-chat-v2',
+  modelId:    process.env.WATSONX_MODEL_ID    || 'ibm/granite-3-8b-instruct',
   iamUrl:     process.env.WATSONX_IAM_URL     || 'https://iam.cloud.ibm.com/identity/token',
 
-  // Generation parameters sent with every request
+  // Generation parameters optimised for granite-3-8b-instruct
   parameters: {
-    decoding_method:   'greedy',
-    max_new_tokens:    800,
-    min_new_tokens:    50,
-    stop_sequences:    [],
-    repetition_penalty: 1.1
+    decoding_method:    'greedy',
+    max_new_tokens:     900,
+    min_new_tokens:     30,
+    stop_sequences:     [],
+    repetition_penalty: 1.05
   }
 };
 
